@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-mtd-server
+  labels:
+    app: cloud-mtd-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-mtd-server
+  template:
+    metadata:
+      labels:
+        app: cloud-mtd-server
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        "node-role.kubernetes.io/worker": "worker"
+      containers:
+      - name: temperature
+        image: vittolibre/mtd-cloud-server
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true

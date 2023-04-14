@@ -1,0 +1,35 @@
+# Kubernetes API version
+apiVersion: apps/v1
+# Deployment object
+kind: Deployment
+metadata:
+  # The name of the Deployment
+  name: cloud-db
+spec:
+  # Replicas for this Deployment
+  replicas: 1
+  selector:
+    # labels the pods
+    matchLabels:
+      app: cloud-db
+  template:
+    metadata:
+      labels:
+        # The label the pods created from the pod template should have
+        app: cloud-db
+    spec:
+      nodeSelector:
+        "node-role.kubernetes.io/worker": "worker"
+      containers:
+        # The container name to execute pods
+        - name: cloud-db
+          # pull postgresimage from docker hub
+          image: vittolibre/cloud-db
+          ports:
+            # Assign ports to expose container
+            - containerPort: 5432
+          envFrom:
+            # Load the environment variables/PostgresSQL credentials
+            - configMapRef:
+                # This should be the ConfigMap name created ealier
+                name: cloud-db-credentials

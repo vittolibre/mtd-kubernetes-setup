@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-gateway
+  labels:
+    app: edge-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-gateway
+  template:
+    metadata:
+      labels:
+        app: edge-gateway
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        "node-role.kubernetes.io/edge": ""
+      containers:
+      - name: temperature
+        image: vittolibre/edge-gateway
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
