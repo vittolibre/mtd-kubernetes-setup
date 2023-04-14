@@ -1,0 +1,103 @@
+sudo su
+
+ apt-get update
+ apt-get install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+    
+ mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  
+ apt-get update
+
+ apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+ modprobe overlay
+ modprobe br_netfilter
+
+# sysctl params required by setup, params persist across reboots
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+# Apply sysctl params without reboot
+ sysctl --system
+
+git clone https://github.com/Mirantis/cri-dockerd.git
+
+# Run these commands as root
+###Install GO###
+wget https://storage.googleapis.com/golang/getgo/installer_linux
+chmod +x ./installer_linux
+./installer_linux
+source ~/.bash_profile
+
+cd cri-dockerd
+mkdir bin
+go build -o bin/cri-dockerd
+mkdir -p /usr/local/bin
+install -o root -g root -m 0755 bin/cri-dockerd /usr/local/bin/cri-dockerd
+cp -a packaging/systemd/* /etc/systemd/system
+sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
+systemctl daemon-reload
+systemctl enable cri-docker.service
+systemctl enable --now cri-docker.socket
+
+ apt-get update
+ apt-get install -y apt-transport-https ca-certificates curl
+
+ curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+ apt-get update
+ apt-get install -y kubelet kubeadm kubectl
+ apt-mark hold kubelet kubeadm kubectl
+
+swapoff -a
+
+kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket=/var/run/cri-dockerd.sock
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+export KUBECONFIG=/etc/kubernetes/admin.conf
+--cri-socket=/var/run/cri-dockerd.sock
+
+kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+kubectl -n kubernetes-dashboard create token admin-user
+
+kubectl label node edge-virtualbox node-role.kubernetes.io/worker=worker
+
+
+--installazione kubedge cloudcore----
+
+wget https://github.com/kubeedge/kubeedge/releases/download/v1.12.1/keadm-v1.12.1-linux-amd64.tar.gz
+tar -zxvf keadm-v1.12.1-linux-amd64.tar.gz
+cp keadm-v1.12.1-linux-amd64/keadm/keadm /usr/local/bin/keadm
+
+keadm init --advertise-address=192.168.1.8 --profile version=v1.12.1 --kube-config=/etc/kubernetes/admin.conf
+
+kubectl label node <master node name> node-role.kubernetes.io/nodeType=cloudCore
+
+keadm join --cloudcore-ipport=<cloud-core pod master node ip>:10000 --edgenode-name=<edge server hostname> --token=<token>
+
+
+
