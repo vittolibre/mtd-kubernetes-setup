@@ -18,8 +18,13 @@ spec:
       nodeSelector:
         "node-role.kubernetes.io/edge": ""
       containers:
-      - name: temperature
+      - name: edge-gateway
         image: vittolibre/edge-gateway
+        env:
+        - name: DB_URL
+          value: "jdbc:postgresql://192.168.122.213:30045/edge"
+        - name: DB_USER
+          value: "edgegatewayadmin"
+        - name: DB_PASSWORD
+          value: "edgegateway"
         imagePullPolicy: Always
-        securityContext:
-          privileged: true

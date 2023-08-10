@@ -5,7 +5,7 @@ metadata:
   # Name your service
   name: cloud-db-service
   labels:
-    app: cloud-db
+    app: cloud-app-db
 spec:
   # Choose how to expose your service
   type: NodePort
@@ -14,4 +14,4 @@ spec:
     - port: 5432
   # Pod to route service traffic  
   selector:
-    app: cloud-db
+    app: cloud-app-db

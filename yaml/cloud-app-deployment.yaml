@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-app
+  labels:
+    app: cloud-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-app
+  template:
+    metadata:
+      labels:
+        app: cloud-app
+    spec:
+      hostNetwork: true
+      containers:
+      - name: cloud-app
+        image: vittolibre/cloud-app
+        env:
+        - name: DB_URL
+          value: "jdbc:postgresql://192.168.122.183:30038/cloud"
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true

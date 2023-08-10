@@ -4,27 +4,27 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   # The name of the Deployment
-  name: cloud-app-db
+  name: edge-app-db
 spec:
   # Replicas for this Deployment
   replicas: 1
   selector:
     # labels the pods
     matchLabels:
-      app: cloud-app-db
+      app: edge-app-db
   template:
     metadata:
       labels:
         # The label the pods created from the pod template should have
-        app: cloud-app-db
+        app: edge-app-db
     spec:
       nodeSelector:
-        "node-role.kubernetes.io/worker": ""
+        "node-role.kubernetes.io/edge": ""
       containers:
         # The container name to execute pods
-        - name: cloud-app-db
+        - name: edge-app-db
           # pull postgresimage from docker hub
-          image: vittolibre/cloud-app-db
+          image: vittolibre/edge-app-db
           ports:
             # Assign ports to expose container
             - containerPort: 5432
@@ -32,4 +32,18 @@ spec:
             # Load the environment variables/PostgresSQL credentials
             - configMapRef:
                 # This should be the ConfigMap name created ealier
-                name: cloud-db-credentials
+                name: edge-db-credentials
+
+kind: ConfigMap
+metadata:
+  # Name your ConfigMap
+  name: edge-db-credentials
+  labels:
+    app: edge-app-db
+data:
+  # User DB
+  POSTGRES_DB: edgegateway
+  # Db user
+  POSTGRES_USER: edgegatewayadmin
+  # Db password
+  POSTGRES_PASSWORD: edgegateway
