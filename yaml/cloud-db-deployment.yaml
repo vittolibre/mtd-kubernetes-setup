@@ -32,4 +32,19 @@ spec:
             # Load the environment variables/PostgresSQL credentials
             - configMapRef:
                 # This should be the ConfigMap name created ealier
-                name: cloud-db-credentials
+                name: cloud-credentials
+
+# Kind for kubernets ConfigMap
+kind: ConfigMap
+metadata:
+  # Name your ConfigMap
+  name: cloud-db-credentials
+  labels:
+    app: cloud-app-db
+data:
+  # User DB
+  POSTGRES_DB: cloud
+  # Db user
+  POSTGRES_USER: cloudadmin
+  # Db password
+  POSTGRES_PASSWORD: cloud
