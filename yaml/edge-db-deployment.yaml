@@ -33,7 +33,6 @@ spec:
             - configMapRef:
                 # This should be the ConfigMap name created ealier
                 name: edge-db-credentials
-
 kind: ConfigMap
 metadata:
   # Name your ConfigMap
