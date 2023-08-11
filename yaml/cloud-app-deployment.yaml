@@ -21,6 +21,10 @@ spec:
         env:
         - name: DB_URL
           value: "jdbc:postgresql://192.168.122.183:30038/cloud"
+ - name: DB_USER
+          value: "cloudadmin"
+ - name: DB_PASSWORD
+          value: "cloud"
         imagePullPolicy: Always
         securityContext:
           privileged: true
